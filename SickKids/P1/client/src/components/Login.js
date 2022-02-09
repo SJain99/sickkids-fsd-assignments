@@ -1,6 +1,6 @@
-import { Component } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { withRouter } from "../utils/withRouter";
 import {
     Flex,
     Heading,
@@ -16,49 +16,12 @@ import {
   } from '@chakra-ui/react'
 import { EmailIcon, ViewIcon, ViewOffIcon, LockIcon } from '@chakra-ui/icons'
 
-class Login extends Component {
-  constructor() {
-    super();
-    this.handleSubmit = this.handleSubmit.bind(this);
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
-    this.state = {
-      email: "",
-      password: "",
-      showPassword: false
-    };
-  }
-
-  handleInputChange = e => {
-    this.setState({
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  handlePasswordShowClick = e => {
-      this.state.showPassword = !this.state.showPassword
-  }
-
-  handleSubmit = e => {
-    e.preventDefault();
-
-    const { email, password } = this.state;
-
-    const userInfo = {
-      email,
-      password,
-    };
-
-    axios
-      .post("http://localhost:5000/api/login", userInfo)
-      .then(res => {
-        res.data.email ? this.props.navigate("/dashboard") : alert("Please enter a valid login.")
-      })
-      .catch(err => {
-        console.error(err);
-      });
-  };
-
-  render() {
     return (
     <Flex
         flexDirection="column"
@@ -80,20 +43,36 @@ class Login extends Component {
             alignItems="center"
         >
             <Heading pb={4} fontSize="5xl">Log in</Heading>
-            <Stack as="form" onSubmit={this.handleSubmit} spacing={4} minWidth="60%" maxWidth="80%">
+            <Stack as="form" onSubmit={(e) => {
+              e.preventDefault();
+            
+              const userInfo = {
+                email,
+                password,
+              };
+            
+              axios
+                .post("http://localhost:5000/api/login", userInfo)
+                .then(res => {
+                  res.data.email ? navigate("/dashboard") : alert("Please enter a valid login.")
+                })
+                .catch(err => {
+                  console.error(err);
+                });
+            }} spacing={4} minWidth="60%" maxWidth="80%">
             <InputGroup size="lg">
                 <InputLeftAddon>
                     <EmailIcon name="email" />
                 </InputLeftAddon>
-                <Input type="text" name="email" placeholder="Email" onChange={this.handleInputChange} />
+                <Input type="text" name="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
             </InputGroup>
             <InputGroup size="lg">
                 <InputLeftAddon>
                     <LockIcon name="lock" />
                 </InputLeftAddon>
-                <Input type={this.state.showPassword ? "text" : "password"} name="password" placeholder="Password" onChange={this.handleInputChange} />
+                <Input type={showPassword ? "text" : "password"} name="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
                 <InputRightElement>
-                <IconButton onClick={this.handlePasswordShowClick} aria-label="View Password Toggle" icon={this.state.showPassword ? <ViewOffIcon /> : <ViewIcon />} variant="ghost" size="md" />
+                <IconButton onClick={() => setShowPassword(!showPassword)} aria-label="View Password Toggle" icon={showPassword ? <ViewOffIcon /> : <ViewIcon />} variant="ghost" size="md" />
                 </InputRightElement>
             </InputGroup>
             <Button type="submit" variant="solid" size="lg" colorScheme="blue">
@@ -107,6 +86,5 @@ class Login extends Component {
     </Flex>
     );
   }
-}
 
-export default withRouter(Login);
+export default Login;

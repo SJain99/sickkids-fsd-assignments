@@ -9,7 +9,6 @@ const matchPass = "1q2w3e";
 let email = "";
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(
     cors({
       origin: "http://localhost:3000",
